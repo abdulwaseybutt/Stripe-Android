@@ -71,14 +71,28 @@ class MainActivity : AppCompatActivity() {
                         )
                     } else {
                         // Handle null response
+                        Toast.makeText(
+                            applicationContext,
+                            response.errorBody().toString(),
+                            Toast.LENGTH_LONG
+                        ).show()
+
                     }
                 } else {
-
+                    Toast.makeText(
+                        applicationContext,
+                        response.errorBody().toString(),
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 
             override fun onFailure(call: Call<MakePaymentResponse>, t: Throwable) {
                 // Handle network errors or other failures here
+                Toast.makeText(
+                    applicationContext,
+                    "NetworkError", Toast.LENGTH_LONG
+                ).show()
             }
         })
     }
