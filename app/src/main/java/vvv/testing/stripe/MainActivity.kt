@@ -2,7 +2,9 @@ package vvv.testing.stripe
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentConfiguration
@@ -26,6 +28,8 @@ class MainActivity : AppCompatActivity() {
     private val apiService = RetrofitClient.getClient().create(ApiService::class.java)
     private lateinit var paymentIntentClientSecret: String
     private lateinit var configuration: PaymentSheet.CustomerConfiguration
+    private lateinit var loadingProgressBar: ProgressBar
+    private lateinit var paymentBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,16 +38,20 @@ class MainActivity : AppCompatActivity() {
 //        val viewModelFactory = PaymentViewModelFactory()
 //        viewModel = ViewModelProvider(this, viewModelFactory)[PaymentViewModel::class.java]
 
+        loadingProgressBar = findViewById(R.id.loadingProgressBar)
+        paymentBtn = findViewById(R.id.paymentBtn)
         paymentSheet = PaymentSheet(this, this::onPaymentSheetResult)
 
-        findViewById<Button>(R.id.paymentBtn).setOnClickListener {
+        paymentBtn.setOnClickListener {
 //            viewModel.makePayment("abc")
             makePayment("abc")
+            paymentBtn.visibility = View.GONE
+            loadingProgressBar.visibility = View.VISIBLE
 
         }
     }
 
-    fun makePayment(authKey: String) {
+    private fun makePayment(authKey: String) {
         val call: Call<MakePaymentResponse> = apiService.makePayment(MakePaymentRequest(authKey))
         call.enqueue(object : Callback<MakePaymentResponse> {
             override fun onResponse(
@@ -76,20 +84,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onPaymentSheetResult(result: PaymentSheetResult) {
+        loadingProgressBar.visibility = View.GONE
+        paymentBtn.visibility = View.VISIBLE
+
         when (result) {
             is PaymentSheetResult.Canceled -> {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
-
             }
 
             is PaymentSheetResult.Failed -> {
                 Toast.makeText(this, "Failed", Toast.LENGTH_LONG).show()
-
             }
 
             is PaymentSheetResult.Completed -> {
                 Toast.makeText(this, "Payment Success!", Toast.LENGTH_LONG).show()
-
             }
         }
 
